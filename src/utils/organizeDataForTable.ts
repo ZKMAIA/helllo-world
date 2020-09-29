@@ -20,7 +20,7 @@ export default function organizeData(data: any[], headers: TableHeader[]):
 
     const headerKeysInOrder = Object.keys(indexedHeaders)
 
-    const organizeData = data.map(item => {
+    const organizedData = data.map(item => {
         const organizedItem: OrganizedItem = {}
 
         headerKeysInOrder.forEach(key => {
@@ -31,6 +31,6 @@ export default function organizeData(data: any[], headers: TableHeader[]):
 
         return organizedItem
     })
-    return [organizeData, indexedHeaders]
+    return [organizedData, indexedHeaders]
 }
 

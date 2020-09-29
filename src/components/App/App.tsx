@@ -29,7 +29,6 @@ function App() {
   }
 
   const handleProductUpdate = (newProduct: Product) => {
-    console.log(newProduct)
     setProducts(products.map(product => 
       product.id === newProduct.id 
         ? newProduct
