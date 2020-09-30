@@ -49,10 +49,10 @@ const Table: React.FC<TableProps> = (props) => {
                         {
                             Object
                                 .keys(row)
-                                .map((item, x) => 
+                                .map((item, i) => 
                                     item !== '$original'
                                     ? <td 
-                                        key={x}
+                                        key={row.$original._id + i}
                                         className={indexedHeaders[item].right ? 'right' : ''}
                                       >
                                         { row[item] }
@@ -66,19 +66,19 @@ const Table: React.FC<TableProps> = (props) => {
                             && <td className="actions right">
                                 {
                                     props.onEdit &&
-                                        <Button onClick={() => props.onEdit && props.onEdit(row)}>
+                                        <Button onClick={() => props.onEdit && props.onEdit(row.$original)}>
                                             Edit
                                         </Button>
                                 }
                                 {
                                     props.onDetail &&
-                                        <Button onClick={() => props.onDetail && props.onDetail(row)}>
+                                        <Button onClick={() => props.onDetail && props.onDetail(row.$original)}>
                                             Detail
                                         </Button>
                                 }
                                 {
                                     props.onDelete &&
-                                        <Button onClick={() => props.onDelete && props.onDelete(row)}>
+                                        <Button onClick={() => props.onDelete && props.onDelete(row.$original)}>
                                             Delete
                                         </Button>
                                 }
