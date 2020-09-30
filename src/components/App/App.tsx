@@ -5,7 +5,10 @@ import Header from '../Header';
 import Container from '../../shared/Container';
 import Table, { TableHeader } from '../../shared/Table'
 import ProductForm, { ProductCreator } from '../Products/ProductForm';
-import { getAllProducts } from '../../services/Products.service';
+import { 
+  getAllProducts, 
+  createSingleProduct, 
+  updateSingleProduct, deleteSingleProduct } from '../../services/Products.service';
 import { Product } from '../../shared/Table/Table.mockdata';
 
 const headers: TableHeader[] = [
@@ -19,34 +22,34 @@ function App() {
   const [products, setProducts] = useState<Product[]>([])
   const [updatingProduct, setUpdatingProduc] = useState<Product | undefined>(undefined)
 
-  useEffect(() => {
-    async function fetchData() {
-      const _products = await getAllProducts()
-      setProducts(_products);
-    }
+  async function fetchData() {
+    const _products = await getAllProducts()
+    setProducts(_products);
+  }
 
-    fetchData()
+useEffect(() => {
+        fetchData()
   }, [])
   
-  const handleProductSubmit = (product: ProductCreator) => {
-    setProducts([
-      ...products,
-      {
-        _id: String(products.length + 1),
-        ...product
-      }
-    ])
+  const handleProductSubmit = async (product: ProductCreator) => {
+    try {
+      await createSingleProduct(product)
+      fetchData()
+    } catch (err) {
+      Swal.fire('Oops!', err.message, 'error')
+    }
   }
 
-  const handleProductUpdate = (newProduct: Product) => {
-    setProducts(products.map(product => 
-      product._id === newProduct._id 
-        ? newProduct
-        : product
-    ))
+  const handleProductUpdate = async (newProduct: Product) => {
+    try {
+      await updateSingleProduct(newProduct)
 
     setUpdatingProduc(undefined)
+    fetchData()
+  } catch (err) {
+    Swal.fire('Oops!', err.message, 'error')
   }
+}
 
   const handleProductDetail = (product: Product) => {
     Swal.fire(
@@ -60,8 +63,14 @@ function App() {
     setUpdatingProduc(product)
   }
 
-  const deleteProduct = (id: string) => {
-    setProducts(products.filter(product => product._id !== id))
+  const deleteProduct = async (id: string) => {
+    try {
+      await deleteSingleProduct(id)
+      Swal.fire('Uhul!', 'Produto excluído com sucesso', 'success')
+      fetchData()
+    } catch (err) {
+    Swal.fire('Oops!', err.message, 'error')
+    }
   }
 
   const handleProducDelete = (product: Product) => {
@@ -76,11 +85,6 @@ function App() {
     }).then((result) => {
       if (result.value) {
         deleteProduct(product._id)
-        Swal.fire(
-          'Exclído!',
-          'Seu rpoduto foi excluído com sucesso.',
-          'success'
-        )
       }
     })
  }
