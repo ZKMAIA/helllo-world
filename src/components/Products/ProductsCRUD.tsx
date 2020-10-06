@@ -5,7 +5,7 @@ import ProductForm, { ProductCreator } from './ProductForm';
 import Swal from 'sweetalert2';
 import { connect, useDispatch } from 'react-redux';
 import * as ProductsAction from '../../redux/Products/Products.actions';
-import { RootState } from '../../redux';
+import { RootState, ThunkDispatch } from '../../redux';
 
 const headers: TableHeader[] = [
     { key: 'id', value: '#' },
@@ -19,48 +19,41 @@ declare interface ProductsCRUDProps {
 }
 
   const ProductsCRUD: React.FC<ProductsCRUDProps>  = (props) => {
-    const dispatch = useDispatch()
-  // const [products, setProducts] = useState<Product[]>([])
-  const [updatingProduct, setUpdatingProduc] = useState<Product | undefined>(undefined)
+    const dispatch:ThunkDispatch = useDispatch()
 
-   async function fetchData() {
-     try {
-      await dispatch(ProductsAction.getProducts())
-      Swal.fire('Uhu!', 'Fetch done', 'success')
-    } catch (err) {
-      Swal.fire('Oops!', err.message, 'error')
-    }
-   }
+    const showErrorAlert =
+      (err: Error) => Swal.fire('Oops!', err.message, 'error')
 
-useEffect(() => {
+    const [updatingProduct, setUpdatingProduc] = useState<Product | undefined>(undefined)
+
+    async function fetchData() {
+      console.log("fetchdata")
+      dispatch(ProductsAction.getProducts())
+        .catch(showErrorAlert)
+      }
+
+      useEffect(() => {
         fetchData()
-  }, [])
+      }, [])
   
-  const handleProductSubmit = async (product: ProductCreator) => {
-    try {
+      const handleProductSubmit = async (product: ProductCreator) => {
       dispatch(ProductsAction.insertNewProduct(product))
-    } catch (err) {
-      Swal.fire('Oops!', err.message, 'error')
+      .catch(showErrorAlert)
     }
-  }
 
-  const handleProductUpdate = async (newProduct: Product) => {
-    try {
-      await dispatch(ProductsAction.updateProduct(newProduct))
-      setUpdatingProduc(undefined)
-  } catch (err) {
-    Swal.fire('Oops!', err.message, 'error')
-  }
-}
+    const handleProductUpdate = async (newProduct: Product) => {
+      dispatch(ProductsAction.updateProduct(newProduct))
+        .then(() => setUpdatingProduc(undefined))
+        .catch(showErrorAlert)
+    }
 
-const deleteProduct = async (id: string) => {
-  try {
-    await dispatch(ProductsAction.deleteProduct(id))
-    Swal.fire('Uhul!', 'Produto excluído com sucesso', 'success')
-  } catch (err) {
-  Swal.fire('Oops!', err.message, 'error')
-  }
-}
+    const deleteProduct = async (id: string) => {
+      dispatch(ProductsAction.deleteProduct(id))
+        .then(() => {
+          Swal.fire('Uhul!', 'Produto excluído com sucesso', 'success')
+        })
+        .catch(showErrorAlert)
+      }
 
 const handleProducDelete = (product: Product) => {
   Swal
@@ -73,12 +66,8 @@ const handleProducDelete = (product: Product) => {
       cancelButtonColor: '#d33',
       confirmButtonText: `Sim, exclua ${product.name}!`
     })
-    .then((result) => {
-      if (result.value) {
-        deleteProduct(product._id)
+    .then(( { value }) => value && deleteProduct(product._id))
       }
-  })
-}
 
 const handleProductDetail = (product: Product) => {
     Swal.fire(
@@ -88,18 +77,14 @@ const handleProductDetail = (product: Product) => {
     )
   }
 
-  const handleProducEdit = (product: Product) => {
-    setUpdatingProduc(product)
-  }
-
- return <>
+  return <>
         <Table
           headers={headers} 
           data={props.products}
           enableActions
           onDelete={handleProducDelete}
           onDetail={handleProductDetail}
-          onEdit={handleProducEdit}
+          onEdit={setUpdatingProduc}
         />
 
         <ProductForm 
