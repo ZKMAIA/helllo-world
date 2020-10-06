@@ -27,7 +27,12 @@ declare interface ProductsCRUDProps {
   const [updatingProduct, setUpdatingProduc] = useState<Product | undefined>(undefined)
 
    async function fetchData() {
-    dispatch(getProducts())
+     try {
+      await dispatch(getProducts())
+      Swal.fire('Uhu!', 'Fetch done', 'success')
+    } catch (err) {
+      Swal.fire('Oops!', err.message, 'error')
+    }
    }
 
 useEffect(() => {
