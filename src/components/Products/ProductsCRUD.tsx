@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import Table, { TableHeader } from '../../shared/Table';
-import { 
-  deleteSingleProduct, 
-  updateSingleProduct 
-} from '../../services/Products.service';
 import { Product } from '../../shared/Table/Table.mockdata';
 import ProductForm, { ProductCreator } from './ProductForm';
 import Swal from 'sweetalert2';
 import { connect, useDispatch } from 'react-redux';
-import { getProducts, insertNewProduct } from '../../redux/Products/Products.actions';
+import * as ProductsAction from '../../redux/Products/Products.actions';
+import { RootState } from '../../redux';
 
 const headers: TableHeader[] = [
     { key: 'id', value: '#' },
@@ -28,7 +25,7 @@ declare interface ProductsCRUDProps {
 
    async function fetchData() {
      try {
-      await dispatch(getProducts())
+      await dispatch(ProductsAction.getProducts())
       Swal.fire('Uhu!', 'Fetch done', 'success')
     } catch (err) {
       Swal.fire('Oops!', err.message, 'error')
@@ -41,8 +38,7 @@ useEffect(() => {
   
   const handleProductSubmit = async (product: ProductCreator) => {
     try {
-      dispatch(insertNewProduct(product))
-      fetchData()
+      dispatch(ProductsAction.insertNewProduct(product))
     } catch (err) {
       Swal.fire('Oops!', err.message, 'error')
     }
@@ -50,9 +46,8 @@ useEffect(() => {
 
   const handleProductUpdate = async (newProduct: Product) => {
     try {
-      await updateSingleProduct(newProduct)
+      await dispatch(ProductsAction.updateProduct(newProduct))
       setUpdatingProduc(undefined)
-      fetchData()
   } catch (err) {
     Swal.fire('Oops!', err.message, 'error')
   }
@@ -60,9 +55,8 @@ useEffect(() => {
 
 const deleteProduct = async (id: string) => {
   try {
-    await deleteSingleProduct(id)
+    await dispatch(ProductsAction.deleteProduct(id))
     Swal.fire('Uhul!', 'Produto excluído com sucesso', 'success')
-    fetchData()
   } catch (err) {
   Swal.fire('Oops!', err.message, 'error')
   }
@@ -116,7 +110,7 @@ const handleProductDetail = (product: Product) => {
     </>
 }
 
-const mapStateToProps = (state: any) => ({
+const mapStateToProps = (state: RootState) => ({
     products: state.products
 })
 
